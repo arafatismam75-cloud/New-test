@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +14,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            background: #f4f4f9;
 
             display: flex;
             justify-content: center;
@@ -25,7 +26,10 @@
         }
 
         .login-container {
-            background: white;
+            width: 100%;
+            max-width: 350px;
+
+            background: #ffffff;
 
             padding: 30px;
 
@@ -33,16 +37,12 @@
 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
 
-            width: 100%;
-            max-width: 350px;
-
             text-align: center;
         }
 
         h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            color: #333;
+            margin: 0 0 25px 0;
+            color: #222;
         }
 
         input {
@@ -53,6 +53,7 @@
             margin: 8px 0;
 
             border: 1px solid #ccc;
+
             border-radius: 5px;
 
             font-size: 15px;
@@ -69,34 +70,35 @@
 
             padding: 12px;
 
-            color: white;
+            margin-top: 10px;
 
             border: none;
+
             border-radius: 5px;
 
-            cursor: pointer;
+            color: white;
 
             font-size: 16px;
 
-            margin-top: 10px;
+            cursor: pointer;
 
             transition: 0.2s;
         }
 
         #loginBtn {
-            background-color: #007bff;
+            background: #007bff;
         }
 
         #loginBtn:hover {
-            background-color: #0056b3;
+            background: #0056b3;
         }
 
         #signupBtn {
-            background-color: #28a745;
+            background: #28a745;
         }
 
         #signupBtn:hover {
-            background-color: #1e7e34;
+            background: #1e7e34;
         }
 
         button:disabled {
@@ -104,16 +106,16 @@
             cursor: not-allowed;
         }
 
-        .message {
-            margin-top: 15px;
+        #message {
+            margin-top: 18px;
+
+            min-height: 22px;
 
             font-size: 14px;
 
             font-weight: bold;
 
             line-height: 1.5;
-
-            min-height: 20px;
         }
 
         .success {
@@ -129,6 +131,7 @@
         }
     </style>
 </head>
+
 
 <body>
 
@@ -158,24 +161,26 @@
             Sign Up
         </button>
 
-        <div id="message" class="message"></div>
+        <div id="message"></div>
 
     </div>
 
 
     <!-- =====================================================
-         FIREBASE
+         FIREBASE SCRIPT
     ====================================================== -->
 
     <script type="module">
 
-        // Firebase App
+        // =====================================================
+        // FIREBASE SDK
+        // =====================================================
+
         import {
             initializeApp
         } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 
 
-        // Firebase Authentication
         import {
             getAuth,
             signInWithEmailAndPassword,
@@ -184,7 +189,8 @@
 
 
         // =====================================================
-        // FIREBASE CONFIGURATION
+        // FIREBASE CONFIG
+        // Project: new-test-c7d82
         // =====================================================
 
         const firebaseConfig = {
@@ -215,7 +221,7 @@
 
 
         // =====================================================
-        // GET HTML ELEMENTS
+        // HTML ELEMENTS
         // =====================================================
 
         const emailInput = document.getElementById("email");
@@ -233,18 +239,18 @@
         // SIGN UP
         // =====================================================
 
-        signupBtn.addEventListener("click", async () => {
+        signupBtn.addEventListener("click", async function () {
 
             const email = emailInput.value.trim();
 
             const password = passwordInput.value;
 
 
-            // Empty check
-            if (!email || !password) {
+            // Check email
+            if (email === "") {
 
                 showMessage(
-                    "Please enter Email and Password.",
+                    "Please enter your email address.",
                     "error"
                 );
 
@@ -252,7 +258,19 @@
             }
 
 
-            // Password length check
+            // Check password
+            if (password === "") {
+
+                showMessage(
+                    "Please enter your password.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            // Minimum password length
             if (password.length < 6) {
 
                 showMessage(
@@ -264,8 +282,7 @@
             }
 
 
-            // Disable buttons
-            setButtonsDisabled(true);
+            setButtons(true);
 
             showMessage(
                 "Creating account...",
@@ -275,10 +292,17 @@
 
             try {
 
-                await createUserWithEmailAndPassword(
-                    auth,
-                    email,
-                    password
+                const userCredential =
+                    await createUserWithEmailAndPassword(
+                        auth,
+                        email,
+                        password
+                    );
+
+
+                console.log(
+                    "Account created:",
+                    userCredential.user
                 );
 
 
@@ -288,23 +312,26 @@
                 );
 
 
-                // Clear password
                 passwordInput.value = "";
 
 
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    "SIGN UP ERROR:",
+                    error
+                );
+
 
                 showMessage(
-                    getFirebaseError(error),
+                    firebaseError(error),
                     "error"
                 );
 
             }
 
 
-            setButtonsDisabled(false);
+            setButtons(false);
 
         });
 
@@ -313,18 +340,18 @@
         // LOGIN
         // =====================================================
 
-        loginBtn.addEventListener("click", async () => {
+        loginBtn.addEventListener("click", async function () {
 
             const email = emailInput.value.trim();
 
             const password = passwordInput.value;
 
 
-            // Empty check
-            if (!email || !password) {
+            // Check email
+            if (email === "") {
 
                 showMessage(
-                    "Please enter Email and Password.",
+                    "Please enter your email address.",
                     "error"
                 );
 
@@ -332,8 +359,19 @@
             }
 
 
-            // Disable buttons
-            setButtonsDisabled(true);
+            // Check password
+            if (password === "") {
+
+                showMessage(
+                    "Please enter your password.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            setButtons(true);
 
             showMessage(
                 "Logging in...",
@@ -352,7 +390,7 @@
 
 
                 console.log(
-                    "Logged in user:",
+                    "Login successful:",
                     userCredential.user
                 );
 
@@ -365,56 +403,90 @@
 
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    "LOGIN ERROR:",
+                    error
+                );
+
 
                 showMessage(
-                    getFirebaseError(error),
+                    firebaseError(error),
                     "error"
                 );
 
             }
 
 
-            setButtonsDisabled(false);
+            setButtons(false);
 
         });
 
 
         // =====================================================
-        // FIREBASE ERROR MESSAGE
+        // FIREBASE ERROR
         // =====================================================
 
-        function getFirebaseError(error) {
+        function firebaseError(error) {
+
+            console.log(
+                "Firebase Error Code:",
+                error.code
+            );
+
 
             switch (error.code) {
 
                 case "auth/invalid-email":
+
                     return "Invalid email address.";
 
+
                 case "auth/user-not-found":
+
                     return "No account found with this email.";
 
+
                 case "auth/wrong-password":
+
                     return "Incorrect password.";
 
+
                 case "auth/invalid-credential":
+
                     return "Invalid email or password.";
 
+
                 case "auth/email-already-in-use":
+
                     return "This email is already registered.";
 
+
                 case "auth/weak-password":
+
                     return "Password must be at least 6 characters.";
 
+
                 case "auth/operation-not-allowed":
-                    return "Email/Password Authentication is not enabled in Firebase.";
+
+                    return "Email/Password authentication is not enabled in Firebase.";
+
 
                 case "auth/too-many-requests":
+
                     return "Too many attempts. Please try again later.";
 
+
+                case "auth/network-request-failed":
+
+                    return "Network error. Please check your internet connection.";
+
+
                 default:
+
                     return error.message || "Something went wrong.";
+
             }
+
         }
 
 
@@ -424,25 +496,27 @@
 
         function showMessage(text, type) {
 
-            messageDiv.innerText = text;
+            messageDiv.textContent = text;
 
-            messageDiv.className =
-                "message " + type;
+            messageDiv.className = type;
+
         }
 
 
         // =====================================================
-        // DISABLE / ENABLE BUTTONS
+        // BUTTON ENABLE / DISABLE
         // =====================================================
 
-        function setButtonsDisabled(disabled) {
+        function setButtons(disabled) {
 
             loginBtn.disabled = disabled;
 
             signupBtn.disabled = disabled;
+
         }
 
     </script>
 
 </body>
+
 </html>
