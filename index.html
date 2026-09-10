@@ -1,522 +1,292 @@
 <!DOCTYPE html>
-<html lang="en">
 
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Firebase Simple Login</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+```
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f9;
+    .login-container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 300px;
+        text-align: center;
+    }
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
+    h2 {
+        margin-bottom: 20px;
+        color: #333;
+    }
 
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
+    input {
+        width: 90%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
 
-        .login-container {
-            width: 100%;
-            max-width: 350px;
+    button {
+        width: 97%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 10px;
+    }
 
-            background: #ffffff;
+    button:hover {
+        background-color: #0056b3;
+    }
 
-            padding: 30px;
+    .message {
+        margin-top: 15px;
+        font-size: 14px;
+        font-weight: bold;
+    }
 
-            border-radius: 10px;
+    .success {
+        color: green;
+    }
 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    .error {
+        color: red;
+    }
+</style>
+```
 
-            text-align: center;
-        }
-
-        h2 {
-            margin: 0 0 25px 0;
-            color: #222;
-        }
-
-        input {
-            width: 100%;
-
-            padding: 12px;
-
-            margin: 8px 0;
-
-            border: 1px solid #ccc;
-
-            border-radius: 5px;
-
-            font-size: 15px;
-
-            outline: none;
-        }
-
-        input:focus {
-            border-color: #007bff;
-        }
-
-        button {
-            width: 100%;
-
-            padding: 12px;
-
-            margin-top: 10px;
-
-            border: none;
-
-            border-radius: 5px;
-
-            color: white;
-
-            font-size: 16px;
-
-            cursor: pointer;
-
-            transition: 0.2s;
-        }
-
-        #loginBtn {
-            background: #007bff;
-        }
-
-        #loginBtn:hover {
-            background: #0056b3;
-        }
-
-        #signupBtn {
-            background: #28a745;
-        }
-
-        #signupBtn:hover {
-            background: #1e7e34;
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        #message {
-            margin-top: 18px;
-
-            min-height: 22px;
-
-            font-size: 14px;
-
-            font-weight: bold;
-
-            line-height: 1.5;
-        }
-
-        .success {
-            color: green;
-        }
-
-        .error {
-            color: red;
-        }
-
-        .info {
-            color: #555;
-        }
-    </style>
 </head>
-
 
 <body>
 
-    <div class="login-container">
+<div class="login-container">
 
-        <h2>Firebase Login</h2>
+```
+<h2>Firebase Login</h2>
 
-        <input
-            type="email"
-            id="email"
-            placeholder="Email Address"
-            autocomplete="email"
-        >
+<input
+    type="email"
+    id="email"
+    placeholder="Email Address"
+    required
+>
 
-        <input
-            type="password"
-            id="password"
-            placeholder="Password"
-            autocomplete="current-password"
-        >
+<input
+    type="password"
+    id="password"
+    placeholder="Password"
+    required
+>
 
-        <button id="loginBtn">
-            Log In
-        </button>
+<button id="loginBtn">
+    Log In
+</button>
 
-        <button id="signupBtn">
-            Sign Up
-        </button>
+<button
+    id="signupBtn"
+    style="background-color: #28a745;"
+>
+    Sign Up
+</button>
 
-        <div id="message"></div>
+<div id="message" class="message"></div>
+```
 
-    </div>
+</div>
 
+<script type="module">
 
-    <!-- =====================================================
-         FIREBASE SCRIPT
-    ====================================================== -->
+    // ==========================================
+    // Firebase CDN
+    // ==========================================
 
-    <script type="module">
+    import {
+        initializeApp
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 
-        // =====================================================
-        // FIREBASE SDK
-        // =====================================================
-
-        import {
-            initializeApp
-        } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-
-
-        import {
-            getAuth,
-            signInWithEmailAndPassword,
-            createUserWithEmailAndPassword
-        } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-
-
-        // =====================================================
-        // FIREBASE CONFIG
-        // Project: new-test-c7d82
-        // =====================================================
-
-        const firebaseConfig = {
-
-            apiKey: "AIzaSyCUPpSdUfW-gTIDasXMuiLSJWU9EwpCTkw",
-
-            authDomain: "new-test-c7d82.firebaseapp.com",
-
-            projectId: "new-test-c7d82",
-
-            storageBucket: "new-test-c7d82.firebasestorage.app",
-
-            messagingSenderId: "245984911721",
-
-            appId: "1:245984911721:web:548bf4131dac250eaf9df8",
-
-            measurementId: "G-F4T6HJJQPN"
-        };
+    import {
+        getAuth,
+        signInWithEmailAndPassword,
+        createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
 
-        // =====================================================
-        // INITIALIZE FIREBASE
-        // =====================================================
+    // ==========================================
+    // Firebase Configuration
+    // Project: new-test-c7d82
+    // ==========================================
 
-        const app = initializeApp(firebaseConfig);
+    const firebaseConfig = {
 
-        const auth = getAuth(app);
+        apiKey: "AIzaSyCUPpSdUFW-gTIDasXMuiLSJWu9EwPCtkw",
 
+        authDomain: "new-test-c7d82.firebaseapp.com",
 
-        // =====================================================
-        // HTML ELEMENTS
-        // =====================================================
+        projectId: "new-test-c7d82",
 
-        const emailInput = document.getElementById("email");
+        storageBucket: "new-test-c7d82.firebasestorage.app",
 
-        const passwordInput = document.getElementById("password");
+        messagingSenderId: "245984911721",
 
-        const loginBtn = document.getElementById("loginBtn");
+        appId: "1:245984911721:web:548bf4131dac250eaf9df8",
 
-        const signupBtn = document.getElementById("signupBtn");
-
-        const messageDiv = document.getElementById("message");
-
-
-        // =====================================================
-        // SIGN UP
-        // =====================================================
-
-        signupBtn.addEventListener("click", async function () {
-
-            const email = emailInput.value.trim();
-
-            const password = passwordInput.value;
+        measurementId: "G-F4T6HJJQPN"
+    };
 
 
-            // Check email
-            if (email === "") {
+    // ==========================================
+    // Initialize Firebase
+    // ==========================================
 
-                showMessage(
-                    "Please enter your email address.",
-                    "error"
-                );
+    const app = initializeApp(firebaseConfig);
 
-                return;
-            }
+    const auth = getAuth(app);
 
 
-            // Check password
-            if (password === "") {
+    // ==========================================
+    // HTML Elements
+    // ==========================================
 
-                showMessage(
-                    "Please enter your password.",
-                    "error"
-                );
+    const emailInput =
+        document.getElementById("email");
 
-                return;
-            }
+    const passwordInput =
+        document.getElementById("password");
 
+    const loginBtn =
+        document.getElementById("loginBtn");
 
-            // Minimum password length
-            if (password.length < 6) {
+    const signupBtn =
+        document.getElementById("signupBtn");
 
-                showMessage(
-                    "Password must be at least 6 characters.",
-                    "error"
-                );
-
-                return;
-            }
+    const messageDiv =
+        document.getElementById("message");
 
 
-            setButtons(true);
+    // ==========================================
+    // SIGN UP
+    // ==========================================
+
+    signupBtn.addEventListener("click", async () => {
+
+        const email = emailInput.value.trim();
+
+        const password = passwordInput.value;
+
+
+        if (!email || !password) {
 
             showMessage(
-                "Creating account...",
-                "info"
+                "Please enter email and password.",
+                "error"
             );
 
-
-            try {
-
-                const userCredential =
-                    await createUserWithEmailAndPassword(
-                        auth,
-                        email,
-                        password
-                    );
+            return;
+        }
 
 
-                console.log(
-                    "Account created:",
-                    userCredential.user
-                );
+        try {
 
-
-                showMessage(
-                    "Account created successfully!",
-                    "success"
-                );
-
-
-                passwordInput.value = "";
-
-
-            } catch (error) {
-
-                console.error(
-                    "SIGN UP ERROR:",
-                    error
-                );
-
-
-                showMessage(
-                    firebaseError(error),
-                    "error"
-                );
-
-            }
-
-
-            setButtons(false);
-
-        });
-
-
-        // =====================================================
-        // LOGIN
-        // =====================================================
-
-        loginBtn.addEventListener("click", async function () {
-
-            const email = emailInput.value.trim();
-
-            const password = passwordInput.value;
-
-
-            // Check email
-            if (email === "") {
-
-                showMessage(
-                    "Please enter your email address.",
-                    "error"
-                );
-
-                return;
-            }
-
-
-            // Check password
-            if (password === "") {
-
-                showMessage(
-                    "Please enter your password.",
-                    "error"
-                );
-
-                return;
-            }
-
-
-            setButtons(true);
+            await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
             showMessage(
-                "Logging in...",
-                "info"
+                "Account created successfully!",
+                "success"
             );
 
+        } catch (error) {
 
-            try {
-
-                const userCredential =
-                    await signInWithEmailAndPassword(
-                        auth,
-                        email,
-                        password
-                    );
-
-
-                console.log(
-                    "Login successful:",
-                    userCredential.user
-                );
-
-
-                showMessage(
-                    "Login Successful! Welcome.",
-                    "success"
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "LOGIN ERROR:",
-                    error
-                );
-
-
-                showMessage(
-                    firebaseError(error),
-                    "error"
-                );
-
-            }
-
-
-            setButtons(false);
-
-        });
-
-
-        // =====================================================
-        // FIREBASE ERROR
-        // =====================================================
-
-        function firebaseError(error) {
-
-            console.log(
-                "Firebase Error Code:",
-                error.code
+            showMessage(
+                error.message,
+                "error"
             );
 
+        }
 
-            switch (error.code) {
-
-                case "auth/invalid-email":
-
-                    return "Invalid email address.";
+    });
 
 
-                case "auth/user-not-found":
+    // ==========================================
+    // LOGIN
+    // ==========================================
 
-                    return "No account found with this email.";
+    loginBtn.addEventListener("click", async () => {
 
+        const email = emailInput.value.trim();
 
-                case "auth/wrong-password":
-
-                    return "Incorrect password.";
-
-
-                case "auth/invalid-credential":
-
-                    return "Invalid email or password.";
+        const password = passwordInput.value;
 
 
-                case "auth/email-already-in-use":
+        if (!email || !password) {
 
-                    return "This email is already registered.";
+            showMessage(
+                "Please enter email and password.",
+                "error"
+            );
 
-
-                case "auth/weak-password":
-
-                    return "Password must be at least 6 characters.";
-
-
-                case "auth/operation-not-allowed":
-
-                    return "Email/Password authentication is not enabled in Firebase.";
-
-
-                case "auth/too-many-requests":
-
-                    return "Too many attempts. Please try again later.";
-
-
-                case "auth/network-request-failed":
-
-                    return "Network error. Please check your internet connection.";
-
-
-                default:
-
-                    return error.message || "Something went wrong.";
-
-            }
-
+            return;
         }
 
 
-        // =====================================================
-        // SHOW MESSAGE
-        // =====================================================
+        try {
 
-        function showMessage(text, type) {
+            await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
-            messageDiv.textContent = text;
+            showMessage(
+                "Login Successful! Welcome.",
+                "success"
+            );
 
-            messageDiv.className = type;
+        } catch (error) {
 
-        }
-
-
-        // =====================================================
-        // BUTTON ENABLE / DISABLE
-        // =====================================================
-
-        function setButtons(disabled) {
-
-            loginBtn.disabled = disabled;
-
-            signupBtn.disabled = disabled;
+            showMessage(
+                error.message,
+                "error"
+            );
 
         }
 
-    </script>
+    });
+
+
+    // ==========================================
+    // MESSAGE
+    // ==========================================
+
+    function showMessage(text, type) {
+
+        messageDiv.innerText = text;
+
+        messageDiv.className =
+            `message ${type}`;
+    }
+
+</script>
 
 </body>
-
 </html>
